@@ -2,10 +2,16 @@ package common
 
 import cats.Monad
 
-object Result:
+object result:
     sealed trait Result[+A]:
         def isSuccess: Boolean = this.isInstanceOf[Success[_]]
         def isFailure: Boolean = this.isInstanceOf[Failure]
+        def withFilter(p: A => Boolean): Result[A] = {
+            this match
+                case Success(a) if p(a) => Success(a)
+                case Success(a) if !p(a) => Failure("")
+                case _ => this
+        }
     final case class Success[A](value: A) extends Result[A]
     final case class Failure(debug: String) extends Result[Nothing]
 
@@ -26,4 +32,4 @@ object Result:
             case Success(Left(a)) => tailRecM(a)(fn)
         end tailRecM
     end ResultMonad
-end Result
+end result

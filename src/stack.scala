@@ -1,5 +1,8 @@
-import common.Operation.{*, given}
-import common.Result.{*, given}
+import common.operation.*
+import common.operation.given
+import common.result.*
+import common.result.given
+
 
 case class Stack (
     size: Int = 256, 

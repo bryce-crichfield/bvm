@@ -1,40 +1,34 @@
-import common.Operation.{*, given}
-import common.Result.{*, given}
+import common.operation.*
+import common.operation.given
+import common.result.*
+import common.result.given
 
-import cats.data.StateT
-import cats.implicits._
+import heap.BestFit
+import heap.Heap
+import heap.Block
 
 
-def pushList(list: List[Byte]): Operation[Stack, Unit] = 
-    list.map(obj => Stack.push(obj))    
-        .sequence
-        .map(_ => ())
-end pushList
+def time(f: => Unit)(runs: Int = 1): Unit = {
+    val start = System.nanoTime()
+    f
+    val end = System.nanoTime()
+    println(f"${((end - start) / 1e9)/runs}s")
+}
 
-object Main extends App
-{
-    println(
-        pushList(List(4,3,2,1)).run(Stack())
+object Main extends App {
+    val heap = Heap (
+        size = 256, 
+        blocks = List(
+            Block(0, 256, true)
+        ),
+        data = Array.fill(256)(0)
     )
-    // val heap = Heap (
-    //     size = 256, 
-    //     blocks = List(
-    //         Block(0, 25, true)
-    //     ),
-    //     data = Array.fill(256)(0)
-    // )
-    // val size = 24
-    // // val expected = List(
-    // //         Block(0, 25, false), 
-    // //         Block(25, 50, true),
-    // //         Block(50, 100, false),
-    // //         Block(100, 148, false),
-    // //         Block(148, 150, true),
-    // //         Block(150, 256, false)
-    // //     )
-    // Heap.alloc(size).run(heap) match
-    //     case Failure(d) => println(d)
-    //     case Success(t) =>
-    //         println(t._1.blocks)
-    //         // assert(t._1.blocks.equals(expected))
+    val size = 24
+    val runs = 1000
+    time { 
+        for (i <- 0 until 1000) {
+            val r = Heap.alloc(20)(BestFit).run(heap) 
+            print("")
+        }
+    } (1000)
 }
