@@ -32,4 +32,11 @@ object result:
             case Success(Left(a)) => tailRecM(a)(fn)
         end tailRecM
     end ResultMonad
+
+    extension [A] (option: Option[A])
+        def toResult(debug: String): Result[A] = 
+            option match
+                case None => Failure(debug)
+                case Some(value) => Success(value)
+            
 end result

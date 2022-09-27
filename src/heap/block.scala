@@ -5,24 +5,38 @@ import common.operation.given
 import common.result.*
 import common.result.given
 
-final case class Block(start: Int, end: Int, free: Boolean) {
+final case class Block(
+    start: Int, 
+    end: Int, 
+    index: Int,
+    free: Boolean
+) {
     def size: Int = end - start
     def fits(req_size: Int): Boolean =
         req_size <= this.size 
 }
 object Block {
+
+    object SizeOrdering extends Ordering[Block] {
+        override def compare(b1: Block, b2: Block): Int =
+            if b1.size < b2.size then -1
+            else if b1.size > b2.size then 1
+            else 0
+        end compare
+    }
+
     def split(size: Int): Operation[Block, Option[Block]] =
         (block: Block) => block match
-            case Block(_, _, _) if size > block.size =>
+            case _ if size > block.size =>
                 Failure("Block Split Oversize")
-            case Block(_, _, f) if !f =>
+            case _ if !block.free =>
                 Failure("Block Split Not Free")
-            case Block(_, _, _) if size == block.size =>
+            case _ if size == block.size =>
                 Success(block, None)
-            case Block(s, e, _) =>
+            case Block(s, e, i, _) =>
                 Success((
-                    Block(s, s+size, true),
-                    Some(Block(s+size, e, true))
+                    Block(s, s+size, i, true),
+                    Some(Block(s+size, e, i+1, true))
                 ))
     end split
 
@@ -33,6 +47,7 @@ object Block {
             else
                 val start = Math.min(self.start, other.start)
                 val end = Math.max(self.end, other.end)
-                Success(Block(start, end, true) -> ())
+                val index = Math.min(self.index, other.index)
+                Success(Block(start, end, index, true) -> ())
     end join    
 }
