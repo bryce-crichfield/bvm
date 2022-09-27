@@ -9,7 +9,7 @@ import cats.implicits._
 case class Heap  (
     size: Int,
     blocks: List[Block],
-    data: Array[Byte]
+    data: List[Byte]
 )
 
 object Heap {
@@ -17,10 +17,9 @@ object Heap {
         Heap (
             size,  
             List(Block(0, size, 0, true)), 
-            Array.fill(size)(0)
+            List.fill(size)(0)
         )
     end apply
-
 
     def alloc(size: Int)(using allocator: Allocator): Operation[Heap, Block] =
         allocator.alloc(size)
@@ -49,6 +48,23 @@ object Heap {
                     )
                     case Nil => Failure ("Free Index is Nil")
             }
-            
     end free
+
+    def read(address: Int): Operation[Heap, Byte] = 
+        (heap: Heap) => 
+            if address >= heap.size then
+                Failure("Read : Address Out of Bounds")
+            else 
+                Success(heap -> heap.data(address))
+    end read
+
+
+    def write(address: Int)(value: Byte): Operation[Heap, Unit] =
+        (heap: Heap) =>
+            if (address >= heap.size) then
+                Failure("Write : Address Out of Bounds")
+            else 
+                Success(
+                    heap.copy(data = heap.data.updated(address, value)) -> ())
+    end write
 }

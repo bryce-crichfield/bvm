@@ -24,7 +24,7 @@ object Main extends App {
         Block(40, 60, 2, true),
         Block(60, 70, 3, true)
     )
-    val heap = Heap(70, blocks, Array.fill(70)(0))
+    val heap = Heap(70, blocks, List.fill(70)(0))
 
     val op = for {
         b <- Heap.alloc(20)
